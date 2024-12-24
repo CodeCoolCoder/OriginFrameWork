@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <IsPackable>true</IsPackable>
+	  <PackAsTool>true</PackAsTool>
+	  <ToolCommandName>origin</ToolCommandName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
+    <PackageReference Include="OriginFrameWork.CoreModule" Version="1.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OriginFrameWork.Core\OriginFrameWork.Core.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.Service\OriginFrameWork.Service.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.Common\OriginFrameWork.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OriginFrameWork.Core\OriginFrameWork.Core.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.Entity\OriginFrameWork.Entity.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.IHotPluginModule\OriginFrameWork.IHotPluginModule.csproj" />
+  </ItemGroup>
+</Project>
