@@ -26,6 +26,7 @@ builder.Services.AddAutoMapper(typeof(OriginSystemProfile));
 //初始化配置文件，将配置文件中的值映射到配置实体类中
 Appsetting.Init(builder.Services, config);
 
+//测试
 
 var dbtype = config.GetSection("Connection").Get<Connection>().DbType;
 var dbstr = config.GetSection("Connection").Get<Connection>().DbConnectionString;
