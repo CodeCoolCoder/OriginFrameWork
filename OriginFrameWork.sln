@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OriginFrameWork.UnitOfWorkM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OriginFrameWork.JwtBearerModule", "OriginFrameWork.JwtBearerModule\OriginFrameWork.JwtBearerModule.csproj", "{04479673-1881-46D6-BC3F-E35A0BAADF55}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OriginFrameWork.RemoteInvokeModule", "OriginFrameWork.RemoteInvokeModule\OriginFrameWork.RemoteInvokeModule.csproj", "{75776CF4-24E3-4D4E-84AA-A2FA9593CE06}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,10 @@ Global
 		{04479673-1881-46D6-BC3F-E35A0BAADF55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04479673-1881-46D6-BC3F-E35A0BAADF55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04479673-1881-46D6-BC3F-E35A0BAADF55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75776CF4-24E3-4D4E-84AA-A2FA9593CE06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75776CF4-24E3-4D4E-84AA-A2FA9593CE06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75776CF4-24E3-4D4E-84AA-A2FA9593CE06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75776CF4-24E3-4D4E-84AA-A2FA9593CE06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -102,6 +108,7 @@ Global
 		{C6486DAE-98DB-4E94-83B5-1EB7798DB985} = {018568D7-2005-4E42-BA02-36270421AF0F}
 		{6FD563E6-B51F-4DEE-BCF1-B39E543C43FE} = {018568D7-2005-4E42-BA02-36270421AF0F}
 		{04479673-1881-46D6-BC3F-E35A0BAADF55} = {018568D7-2005-4E42-BA02-36270421AF0F}
+		{75776CF4-24E3-4D4E-84AA-A2FA9593CE06} = {018568D7-2005-4E42-BA02-36270421AF0F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {66BBAFD5-260A-473D-A185-1690006374AC}

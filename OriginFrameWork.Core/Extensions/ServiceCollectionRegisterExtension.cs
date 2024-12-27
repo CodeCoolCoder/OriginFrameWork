@@ -1,10 +1,9 @@
-using System.DirectoryServices.Protocols;
-using System.Reflection;
-using Autofac.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OriginFrameWork.Core.RemoteServiceDiscovery;
 using OriginFrameWork.CoreModule;
 using OriginFrameWork.Entity;
+using System.Reflection;
 
 
 namespace OriginFrameWork.Core.Extensions;
@@ -62,7 +61,7 @@ public static class ServiceCollectionRegisterExtension
                 && !m.IsAbstract
                 && !m.IsInterface
             );
-            var implementtationtypesForGeneric= asmService.GetTypes().Where(
+            var implementtationtypesForGeneric = asmService.GetTypes().Where(
                 m => m.IsAssignableTo(typeof(IocTagForGenerics))
                 && !m.IsAbstract
                 && !m.IsInterface
@@ -70,7 +69,7 @@ public static class ServiceCollectionRegisterExtension
             // .Where(m => m != typeof(IocTag))
             ///对取到的接口进行循环，排除掉ioctag，剩下的就是我们要的,implementtationtypes里面只有一条数据，因为只有一个customerservice继承ioctag
             foreach (var implementtationtype in implementtationtypes)
-            {          
+            {
                 var interfacetype = implementtationtype.GetInterfaces().FirstOrDefault();
                 services.AddTransient(interfacetype, implementtationtype);
             }
@@ -88,25 +87,39 @@ public static class ServiceCollectionRegisterExtension
     public static void OriginModuleRegister(this IServiceCollection services)
     {
         var context = new OriginServiceConfigurationContext(services);
-        var assemblys=AppDomain.CurrentDomain.GetAssemblies();
+        var assemblys = AppDomain.CurrentDomain.GetAssemblies();
+        IEnumerable<Type> remoteType = Enumerable.Empty<Type>();
         foreach (var assembly in assemblys)
-        {          
-            var types = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IOriginModule))&&! t.IsInterface&&!t.IsAbstract);
+        {
+            remoteType = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IRemoteServieTag)) && !t.IsInterface && !t.IsAbstract);
+            var types = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IOriginModule)) && !t.IsInterface && !t.IsAbstract);
             foreach (var type in types)
             {
                 var nowModule = Activator.CreateInstance(type) as IOriginModule;
                 nowModule.ConfigureServices(context);
-                var attribute =type.GetCustomAttributes<OriginInject>(true).ToList();
+                var attribute = type.GetCustomAttributes<OriginInject>(true).ToList();
                 foreach (var attr in attribute)
-                {                   
+                {
                     var origintypes = attr.ModuleType;
                     foreach (var item in origintypes)
                     {
                         var moduleRes = Activator.CreateInstance(item) as IOriginModule;
                         moduleRes.ConfigureServices(context);
-                    }                   
-                }                           
+                    }
+                }
             }
-        }      
+        }
+        //注册controller动态生成模块
+        if (remoteType.Count() > 0)
+        {
+            foreach (var item in remoteType)
+            {
+                var interfacetype = item.GetInterfaces().FirstOrDefault();
+                //services.AddTransient(interfacetype, item);
+                var generator = new DynamicApiControllergenrator(services, "app/api");
+                generator.RegisterService(interfacetype);
+                services.AddScoped(interfacetype, item);
+            }
+        }
     }
 }
