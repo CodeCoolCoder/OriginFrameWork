@@ -1,6 +1,7 @@
 ﻿using Castle.Core.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using OriginFrameWork.RemoteInvokeModule.RemoteAttributes;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -9,7 +10,9 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
     public class DynamicApiControllergenrator
     {
         private readonly IServiceCollection _services;
-        private readonly List<Type> _serviceTypes = new();
+        /// <summary>
+        /// 控制器默认前缀
+        /// </summary>
         private readonly string Prefix = "api";
         public DynamicApiControllergenrator(IServiceCollection services, string prefix)
         {
@@ -19,24 +22,25 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
         //where TService : class
         //   where TImplementation : class, TService <TService, TImplementation>
         // , Type TImplementation
+        /// <summary>
+        /// 控制器注册
+        /// </summary>
+        /// <param name="TService"></param>
         public void RegisterService(Type TService)
-
         {
             var IserviceType = TService;
-            _serviceTypes.Add(IserviceType);
-
-            // 注册服务实现
-
-
             // 创建动态控制器
             var controllerType = CreateControllerType(IserviceType);
-
             // 注册控制器
             _services.AddMvc()
                 .AddApplicationPart(controllerType.Assembly)
                 .AddControllersAsServices();
         }
-
+        /// <summary>
+        /// 创建动态控制器
+        /// </summary>
+        /// <param name="serviceType"></param>
+        /// <returns></returns>
         private Type CreateControllerType(Type serviceType)
         {
             //前面的类名称
@@ -91,7 +95,13 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
 
             return typeBuilder.CreateType();
         }
-
+        /// <summary>
+        /// 添加构造函数
+        /// </summary>
+        /// <param name="typeBuilder"></param>
+        /// <param name="serviceField"></param>
+        /// <param name="serviceType"></param>
+        /// <exception cref="InvalidOperationException"></exception>
         private void AddConstructor(TypeBuilder typeBuilder, FieldBuilder serviceField, Type serviceType)
         {
             var ctor = typeBuilder.DefineConstructor(
@@ -121,8 +131,17 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
             il.Emit(OpCodes.Stfld, serviceField);
             il.Emit(OpCodes.Ret);
         }
-        private void CreateAction(TypeBuilder typeBuilder, MethodInfo method,
-    FieldBuilder serviceField, RemoteServiceAttribute? attrclass, RemoteServiceIndividualAttribute? attrmethod, string routeName)
+        /// <summary>
+        /// 添加action
+        /// </summary>
+        /// <param name="typeBuilder"></param>
+        /// <param name="method"></param>
+        /// <param name="serviceField"></param>
+        /// <param name="attrclass"></param>
+        /// <param name="attrmethod"></param>
+        /// <param name="routeName"></param>
+        private void CreateAction(TypeBuilder typeBuilder, MethodInfo method, FieldBuilder serviceField,
+            RemoteServiceAttribute? attrclass, RemoteServiceIndividualAttribute? attrmethod, string routeName)
         {
 
             string httpMethod = "";
@@ -218,7 +237,6 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
             il.Emit(OpCodes.Callvirt, method);
             il.Emit(OpCodes.Ret);
         }
-
         private bool IsSimpleType(Type type)
         {
             return type.IsPrimitive
@@ -230,7 +248,6 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
                 || type == typeof(Guid)
                 || type.IsEnum;
         }
-
         private void AddFromQueryAttribute(ParameterBuilder paramBuilder)
         {
             var fromQueryAttr = typeof(FromQueryAttribute);
@@ -238,7 +255,6 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
             var fromQueryBuilder = new CustomAttributeBuilder(fromQueryCtor, Array.Empty<object>());
             paramBuilder.SetCustomAttribute(fromQueryBuilder);
         }
-
         private void AddFromBodyAttribute(ParameterBuilder paramBuilder)
         {
             var fromBodyAttr = typeof(FromBodyAttribute);
@@ -246,7 +262,6 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
             var fromBodyBuilder = new CustomAttributeBuilder(fromBodyCtor, Array.Empty<object>());
             paramBuilder.SetCustomAttribute(fromBodyBuilder);
         }
-
         private void AddProducesResponseTypeAttribute(MethodBuilder methodBuilder, Type returnType)
         {
             // 处理 Task<T>
@@ -262,7 +277,6 @@ namespace OriginFrameWork.Core.RemoteServiceDiscovery
                 new object[] { returnType, 200 });
             methodBuilder.SetCustomAttribute(producesBuilder);
         }
-
         private Type GetHttpMethodAttribute(string httpMethod)
         {
             return (httpMethod?.ToUpper()) switch

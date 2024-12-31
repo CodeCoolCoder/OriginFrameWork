@@ -15,12 +15,10 @@ namespace OriginFrameWork.RemoteInvokeModule.DynamicProxy
     public class RemoteServiceInterceptor : IInterceptor
     {
         private readonly IRemoteServiceInvoker _serviceInvoker;
-
         public RemoteServiceInterceptor(IRemoteServiceInvoker serviceInvoker)
         {
             _serviceInvoker = serviceInvoker;
         }
-
         /// <summary>
         /// 拦截方法调用
         /// </summary>

@@ -13,13 +13,11 @@ namespace OriginFrameWork.RemoteInvokeModule.RemoteServerTodo
     {
         private readonly HttpClient _httpClient;
         private readonly IServiceDiscovery _serviceDiscovery;
-
         public RemoteServiceInvoker(HttpClient httpClient, IServiceDiscovery serviceDiscovery)
         {
             _httpClient = httpClient;
             _serviceDiscovery = serviceDiscovery;
         }
-
         /// <summary>
         /// 执行远程调用
         /// </summary>
@@ -38,12 +36,27 @@ namespace OriginFrameWork.RemoteInvokeModule.RemoteServerTodo
             // 发送请求并处理响应
             var response = await _httpClient.SendAsync(requestMessage);
             response.EnsureSuccessStatusCode();
+            if (typeof(TResult).IsPrimitive || typeof(TResult) == typeof(string))
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var res = Convert.ChangeType(content, typeof(TResult));
+                return (TResult)res;
 
-            var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<TResult>(content);
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<TResult>(content);
+            }
+
         }
-
-
+        /// <summary>
+        /// 创建请求消息
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="address"></param>
+        /// <param name="prefix"></param>
+        /// <returns></returns>
         private HttpRequestMessage CreateRequestMessage(RemoteServiceInvocationContext context, string address, string prefix)
         {
             var requestMessage = new HttpRequestMessage();

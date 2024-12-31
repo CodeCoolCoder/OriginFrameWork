@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OriginFrameWork.Core.RemoteServiceDiscovery;
+
 using OriginFrameWork.CoreModule;
 using OriginFrameWork.Entity;
 using System.Reflection;
@@ -87,11 +87,11 @@ public static class ServiceCollectionRegisterExtension
     public static void OriginModuleRegister(this IServiceCollection services)
     {
         var context = new OriginServiceConfigurationContext(services);
+        // .GetAssemblies().GetReferanceAssemblies()
         var assemblys = AppDomain.CurrentDomain.GetAssemblies();
-        IEnumerable<Type> remoteType = Enumerable.Empty<Type>();
         foreach (var assembly in assemblys)
         {
-            remoteType = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IRemoteServieTag)) && !t.IsInterface && !t.IsAbstract);
+
             var types = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IOriginModule)) && !t.IsInterface && !t.IsAbstract);
             foreach (var type in types)
             {
@@ -107,19 +107,12 @@ public static class ServiceCollectionRegisterExtension
                         moduleRes.ConfigureServices(context);
                     }
                 }
+
             }
+
         }
-        //注册controller动态生成模块
-        if (remoteType.Count() > 0)
-        {
-            foreach (var item in remoteType)
-            {
-                var interfacetype = item.GetInterfaces().FirstOrDefault();
-                //services.AddTransient(interfacetype, item);
-                var generator = new DynamicApiControllergenrator(services, "app/api");
-                generator.RegisterService(interfacetype);
-                services.AddScoped(interfacetype, item);
-            }
-        }
+
+
     }
+
 }

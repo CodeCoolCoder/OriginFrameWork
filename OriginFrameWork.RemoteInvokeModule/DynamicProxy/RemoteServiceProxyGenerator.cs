@@ -14,21 +14,19 @@ namespace OriginFrameWork.RemoteInvokeModule.DynamicProxy
     {
         private readonly IRemoteServiceInvoker _serviceInvoker;
         private readonly ProxyGenerator _proxyGenerator;
-
         public RemoteServiceProxyGenerator(IRemoteServiceInvoker serviceInvoker)
         {
             _serviceInvoker = serviceInvoker;
             _proxyGenerator = new ProxyGenerator();
         }
-
         /// <summary>
         /// 创建服务接口的代理实例
         /// </summary>
         /// <typeparam name="TService">服务接口类型</typeparam>
         /// <returns>服务接口的代理实例</returns>
-        public TService CreateProxy<TService>() where TService : class
+        public object CreateProxy(Type TService)
         {
-            return _proxyGenerator.CreateInterfaceProxyWithoutTarget<TService>(new RemoteServiceInterceptor(_serviceInvoker));
+            return _proxyGenerator.CreateInterfaceProxyWithoutTarget(TService, new RemoteServiceInterceptor(_serviceInvoker));
         }
     }
 }

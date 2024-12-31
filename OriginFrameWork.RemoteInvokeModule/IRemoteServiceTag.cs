@@ -1,6 +1,6 @@
 ﻿namespace OriginFrameWork.RemoteInvokeModule
 {
-    public interface IRemoteServieTag
+    public interface IRemoteServiceTag
     {
     }
 }

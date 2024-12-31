@@ -1,8 +1,11 @@
-using OriginFrameWork.Entity;
+using OriginFrameWork.RemoteInvokeModule;
+using OriginFrameWork.RemoteInvokeModule.RemoteAttributes;
+
 
 namespace OriginFrameWork.Service.OriginApp;
-
-public interface IOriginService : IocTag
+[RemoteServiceAttribute("OriginService")]
+public interface IOriginService : IRemoteServiceTag
 {
-
+    [RemoteServiceIndividualAttribute("GET")]
+    Task<string> GetString(string get);
 }
