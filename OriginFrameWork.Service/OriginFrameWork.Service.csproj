@@ -1,12 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\OriginFrameWork.Core\OriginFrameWork.Core.csproj" />
     <ProjectReference Include="..\OriginFrameWork.Common\OriginFrameWork.Common.csproj" />
     <ProjectReference Include="..\OriginFrameWork.RemoteInvokeModule\OriginFrameWork.RemoteInvokeModule.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="12.0.1" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>

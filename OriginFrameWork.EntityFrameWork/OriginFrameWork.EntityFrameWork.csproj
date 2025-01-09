@@ -7,12 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="5.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\OriginFrameWork.CoreModule\OriginFrameWork.CoreModule.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.EntityFrameWorkCoreModule\OriginFrameWork.EntityFrameWorkCoreModule.csproj" />
   </ItemGroup>
 
 </Project>

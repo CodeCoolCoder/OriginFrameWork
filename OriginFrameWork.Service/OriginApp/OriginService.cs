@@ -1,10 +1,10 @@
-﻿namespace OriginFrameWork.Service.OriginApp
+﻿namespace OriginFrameWork.Service.OriginApp;
+
+public class OriginService : IOriginService
 {
-    public class OriginService : IOriginService
+
+    public async Task<string> GetString(string get)
     {
-        public async Task<string> GetString(string get)
-        {
-            return await Task.FromResult(get);
-        }
+        return get;
     }
 }

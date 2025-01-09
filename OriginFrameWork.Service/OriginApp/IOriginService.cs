@@ -1,6 +1,6 @@
-using OriginFrameWork.RemoteInvokeModule;
-using OriginFrameWork.RemoteInvokeModule.RemoteAttributes;
 
+using OriginFrameWork.CoreModule.OriginInterface;
+using OriginFrameWork.RemoteInvokeModule.RemoteAttributes;
 
 namespace OriginFrameWork.Service.OriginApp;
 [RemoteServiceAttribute("OriginService")]

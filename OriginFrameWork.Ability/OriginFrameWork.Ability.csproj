@@ -7,12 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="5.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\OriginFrameWork.CoreModule\OriginFrameWork.CoreModule.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.EntityFrameWork\OriginFrameWork.EntityFrameWork.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.RemoteInvokeModule\OriginFrameWork.RemoteInvokeModule.csproj" />
   </ItemGroup>
 
 </Project>

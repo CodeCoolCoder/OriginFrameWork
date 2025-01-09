@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OriginFrameWork.Core.Configuration;
+using System.Text;
 
 
 
@@ -44,7 +44,7 @@ public static class OriginAuthExtension
                  ValidIssuer = token.Issuer,
                  //有效接收者
                  ValidAudience = token.Audience
-                
+
              };
              //Events应用程序提供的对象，用于处理持有者身份验证处理程序引发的事件。
              //应用程序可以完全实现接口，也可以创建 JwtBearerEvents 实例，并仅将委托分配给它要处理的事件。

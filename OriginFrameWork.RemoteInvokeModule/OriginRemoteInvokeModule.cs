@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using OriginFrameWork.Core.RemoteServiceDiscovery;
 using OriginFrameWork.CoreModule;
 using OriginFrameWork.CoreModule.Extensions;
+using OriginFrameWork.CoreModule.OriginInterface;
 using OriginFrameWork.RemoteInvokeModule.DynamicProxy;
+using OriginFrameWork.RemoteInvokeModule.RemoteServer;
 using OriginFrameWork.RemoteInvokeModule.RemoteServerTodo;
 using OriginFrameWork.RemoteInvokeModule.RemoteServiceDiscovery;
 
@@ -20,45 +21,26 @@ namespace OriginFrameWork.RemoteInvokeModule
             services.AddSingleton<IRemoteServiceInvoker, RemoteServiceInvoker>();
             services.AddSingleton<RemoteServiceProxyGenerator>();
             var assemblys = AppDomain.CurrentDomain.GetAssemblies();
-            List<Type> clientRemoteType = new List<Type>();
+            IEnumerable<Type> remoteType = Enumerable.Empty<Type>();
             foreach (var assembly in assemblys)
             {
-                assembly.GetTypes().Where(t => t.IsInterface).ToList().ForEach(m =>
-                                {
-                                    var typename = m.GetInterface("IRemoteServiceTag");
-                                    if (typename != null && typename.Name == "IRemoteServiceTag")
-                                    {
-                                        clientRemoteType.Add(m);
-                                    }
-                                });
-                foreach (var type in clientRemoteType)
+                remoteType = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IRemoteServiceTag)) && !t.IsInterface && !t.IsAbstract);
+
+                foreach (var type in remoteType)
                 {
-                    services.AddTransient(type, sp =>
+                    var Itype = type.GetInterfaces().FirstOrDefault();
+                    // var ss = Activator.CreateInstance(Itype);
+                    services.AddTransient(Itype, sp =>
                     {
                         var generator = sp.GetRequiredService<RemoteServiceProxyGenerator>();
-                        return generator.CreateProxy(type);
-
+                        var proxyType = typeof(RemoteServiceProxyGenerator).GetMethod("CreateProxy").MakeGenericMethod(Itype);
+                        return proxyType.Invoke(generator, null);
                     });
                 }
-                var serverRemoteType = assembly.GetTypes().Where(
-                        m => m.IsAssignableTo(typeof(IRemoteServiceTag))
-                        && !m.IsAbstract
-                        && !m.IsInterface
-                    );
-                //注册controller动态生成模块
-                foreach (var item in serverRemoteType)
-                {
-                    //注册controller动态生成模块
-                    var interfacetype = item.GetInterfaces().FirstOrDefault();
-                    //services.AddTransient(interfacetype, item);
-                    var generator = new DynamicApiControllergenrator(services, "app/api");
-                    generator.RegisterService(interfacetype);
-                    services.AddScoped(interfacetype, item);
-                }
-
-
-                clientRemoteType.Clear();
             }
+            //服务端注册
+            services.RemoteServerRegisterModule();
+
         }
     }
 }

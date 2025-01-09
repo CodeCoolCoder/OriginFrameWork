@@ -6,11 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\OriginFrameWork.Core\OriginFrameWork.Core.csproj" />
-    <ProjectReference Include="..\OriginFrameWork.Entity\OriginFrameWork.Entity.csproj" />
-    <ProjectReference Include="..\OriginFrameWork.IHotPluginModule\OriginFrameWork.IHotPluginModule.csproj" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 </Project>

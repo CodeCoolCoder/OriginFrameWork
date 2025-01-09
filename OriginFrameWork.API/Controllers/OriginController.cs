@@ -20,16 +20,16 @@ namespace OriginFrameWork.API.Controllers;
 //9.授权过滤器，获取信息在Fileters中的CtmAuthorizationFilterAttribute进行配置，详细使用后续会出文档，可参考在devicesystem中的使用
 public class OriginController : ControllerBase
 {
-    private readonly IOriginService _userService;
-
-    public OriginController(IOriginService userService)
+    public OriginController(IOriginService originService)
     {
-        _userService = userService;
+        OriginService = originService;
     }
 
-    [HttpPost("/OriginService")]
-    public async Task<string> Origin(string ss)
-    {
-        return await _userService.GetString(ss);
-    }
+    public IOriginService OriginService { get; }
+
+    //[HttpPost("/OriginService")]
+    //public async Task<string> Origin(string ss)
+    //{
+    //    return await OriginService.GetString(ss);
+    //}
 }

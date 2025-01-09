@@ -1,18 +1,18 @@
-﻿using OriginFrameWork.Core.Extensions;
+﻿using OriginFrameWork.Core;
 using OriginFrameWork.CoreModule;
-using OriginFrameWork.RemoteInvokeModule;
 
 namespace OriginFrameWork.API
 {
-    [OriginInject(typeof(OriginRemoteInvokeModule))]
+    /// <summary>
+    /// OriginFrameWorkCoreModule为了注册业务服务iservie，需继承ioc的或iocgeneric
+    /// </summary>
+    [OriginInject(typeof(OriginFrameWorkCoreModule), typeof(OriginFrameWorkAbilityModule))]
     public class OriginFrameWorkAPIModule : OriginModule
     {
         public override void ConfigureServices(OriginServiceConfigurationContext context)
         {
-            var service = context.Services;
-            service.RepositoryRegister();
-            service.ServiceRegister();
-            //service.OriginModuleRegister();
+            var services = context.Services;
+
             base.ConfigureServices(context);
         }
     }
