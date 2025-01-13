@@ -8,4 +8,5 @@ public interface IOriginService : IRemoteServiceTag
 {
     [RemoteServiceIndividualAttribute("GET")]
     Task<string> GetString(string get);
+
 }

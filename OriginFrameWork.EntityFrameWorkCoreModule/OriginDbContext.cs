@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyModel;
-using Microsoft.Extensions.Logging;
 using OriginFrameWork.CoreModule.OriginInterface;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -21,12 +20,12 @@ namespace OriginFrameWork.EntityFrameWorkCoreModule
         /// <summary>
         /// 打印sql   
         /// </summary>
-        public static readonly ILoggerFactory loggerFactory
-         = LoggerFactory.Create(builder => { builder.AddConsole(); });
+        //public static readonly ILoggerFactory loggerFactory
+        // = LoggerFactory.Create(builder => { builder.AddConsole(); });
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLoggerFactory(loggerFactory);
+            // optionsBuilder.UseLoggerFactory(loggerFactory);
             // if (!optionsBuilder.IsConfigured)
             // {
             //     optionsBuilder.UseOracle("数据库连接字符串");

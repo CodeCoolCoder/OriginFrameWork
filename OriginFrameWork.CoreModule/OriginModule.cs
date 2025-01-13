@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OriginFrameWork.CoreModule
+﻿namespace OriginFrameWork.CoreModule
 {
     /// <summary>
     /// 所有扩展模块需继承该类
     /// </summary>
-    public abstract class OriginModule: IOriginModule
+    public abstract class OriginModule : IOriginModule
     {
         protected internal OriginServiceConfigurationContext ServiceConfigurationContext
         {
@@ -26,7 +19,28 @@ namespace OriginFrameWork.CoreModule
             internal set => _serviceConfigurationContext = value;
         }
         private OriginServiceConfigurationContext? _serviceConfigurationContext;
+
+        protected internal OriginApplicationInitializationContext ApplicationInitializationContext
+        {
+            get
+            {
+                if (_applicationInitializationContext == null)
+                {
+                    throw new Exception($"{nameof(ApplicationInitializationContext)} is only available in the {nameof(ConfigureServices)}");
+                }
+
+                return _applicationInitializationContext;
+            }
+            internal set => _applicationInitializationContext = value;
+        }
+        private OriginApplicationInitializationContext? _applicationInitializationContext;
+
         public virtual void ConfigureServices(OriginServiceConfigurationContext context)
+        {
+
+        }
+
+        public virtual void ApplicationInitialization(OriginApplicationInitializationContext context)
         {
 
         }
