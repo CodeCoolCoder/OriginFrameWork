@@ -1,5 +1,7 @@
-using System.Reflection;
 using StackExchange.Redis;
+using System.Collections;
+using System.Reflection;
+using System.Text.Json;
 
 namespace OriginFrameWork.Common.RedisHelper;
 /// <summary>
@@ -12,23 +14,25 @@ public partial class RedisWorker
     /// </summary>
     /// <param name="key"></param>
     /// <param name="entries"></param>
-    public void SetHashMemory(string key, params HashEntry[] entries)
+    public void SetHashMemory(string key, DateTime expireTime, params HashEntry[] entries)
     {
         RedisCore.Db.HashSet(key, entries);
+        RedisCore.Db.KeyExpire(key, expireTime);
+
     }
     /// <summary>
     /// 将字典转换为hashentry存入redis
     /// </summary>
     /// <param name="key"></param>
     /// <param name="dics"></param>
-    public void SetHashMemory(string key, Dictionary<string, string> dics)
+    public void SetHashMemory(string key, Dictionary<string, string> dics, DateTime expireTime)
     {
         var hashEntry = new List<HashEntry>();
         foreach (var dic in dics)
         {
             hashEntry.Add(new HashEntry(dic.Key, dic.Value));
         }
-        SetHashMemory(key, hashEntry.ToArray());
+        SetHashMemory(key, expireTime, hashEntry.ToArray());
     }
 
     /// <summary>
@@ -38,79 +42,222 @@ public partial class RedisWorker
     /// <param name="entity"></param>
     /// <param name="type"></param>
     /// <typeparam name="T"></typeparam>
-    public void SetHashMemory<T>(string key, T entity, Type type = null)
+
+    public void SetHashMemory<T>(string key, T entity, DateTime expireTime, Type type = null)
     {
-        // 如果type为null，则将其设置为T的类型
         type ??= typeof(T);
         List<HashEntry> hashEntries = new();
         PropertyInfo[] props = type.GetProperties();
+
         foreach (var prop in props)
         {
             string name = prop.Name;
             object value = prop.GetValue(entity);
-            //如果值为null就设为空
-            if (value == null)
-            {
-                value = "";
-            }
-            //redis无法存储bool类型的值，需转换为0,1形式
-            if (value.GetType().Name == "Boolean") value = (bool)value ? 1 : 0;
-            {
-                hashEntries.Add(new HashEntry(name, value.ToString()));
-            }
+
+            // 处理属性值
+            string serializedValue = SerializePropertyValue(value);
+            hashEntries.Add(new HashEntry(name, serializedValue));
         }
-        SetHashMemory(key, hashEntries.ToArray());
+        SetHashMemory(key, expireTime, hashEntries.ToArray());
     }
 
-    public void SetHashMemory<T>(string key, IEnumerable<T> entities, Func<T, IEnumerable<string>> func)
+
+    public void SetHashMemory<T>(string key, IEnumerable<T> entities, DateTime expireTime, Func<T, IEnumerable<string>> func)
     {
         Type type = typeof(T);
         foreach (var entity in entities)
         {
             var valueKeys = func(entity);
-            SetHashMemory($"{key}:{string.Join(":", valueKeys)}", entity, type);
+            SetHashMemory($"{key}:{string.Join(":", valueKeys)}", entity, expireTime, type);
         }
     }
+
     /// <summary>
-    /// 获取hash
+    /// 从Redis读取数据并反序列化
     /// </summary>
-    /// <param name="keyLike"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public List<T> GetHashMemory<T>(string keyLike) where T : new()
+    public T GetHashMemory<T>(string key) where T : class, new()
     {
-        var keys = GetKeys(keyLike);
-        List<T> ts = new();
-        foreach (var key in keys)
+        var hashFields = RedisCore.Db.HashGetAll(key);
+        if (hashFields.Length == 0)
+            return null;
+        T result = new T();
+        Type type = typeof(T);
+        var properties = type.GetProperties();
+
+        foreach (var field in hashFields)
         {
-            T t = new();
-            // 这里拿到的其实是一个集合
-            // 我们要循环这个集合，拿到里面的每一个kv
-            var res = RedisCore.Db.HashGetAll(key);
-            var props = t.GetType().GetProperties();
-            foreach (var item in res)
+            var prop = properties.FirstOrDefault(p => p.Name == field.Name);
+            if (prop == null || !prop.CanWrite)
+                continue;
+
+            string value = field.Value;
+            if (string.IsNullOrEmpty(value))
+                continue;
+            try
             {
-                foreach (var prop in props)
-                {
-                    if (prop.Name == item.Name)
-                    {
-                        var nullt = prop.PropertyType;
-                        /// <summary>
-                        /// 获取nullable<t>中的t类型，如果不为nullable类型则返回null
-                        /// </summary>
-                        /// <returns></returns>
-                        var nulltype = Nullable.GetUnderlyingType(nullt);
-                        if (nulltype != null)
-                        {
-                            nullt = nulltype;
-                        }
-                        prop.SetValue(t, Convert.ChangeType(item.Value, nullt));
-                        break;
-                    }
-                }
+                object deserializedValue = DeserializePropertyValue(value, prop.PropertyType);
+                prop.SetValue(result, deserializedValue);
             }
-            ts.Add(t);
+            catch (Exception ex)
+            {
+                // 处理反序列化错误
+                // 可以选择记录日志或者其他处理方式
+                Console.WriteLine($"Error deserializing property {prop.Name}: {ex.Message}");
+            }
         }
-        return ts;
+
+        return result;
     }
+
+    /// <summary>
+    /// 反序列化属性值
+    /// </summary>
+    private object DeserializePropertyValue(string value, Type targetType)
+    {
+        if (string.IsNullOrEmpty(value))
+            return null;
+
+        // 处理简单类型
+        if (IsSimpleType(targetType))
+        {
+            if (targetType == typeof(bool))
+                return value == "1";
+
+            if (targetType.IsEnum)
+                return Enum.Parse(targetType, value);
+
+            if (targetType == typeof(DateTime))
+                return DateTime.Parse(value);
+
+            if (targetType == typeof(TimeSpan))
+                return TimeSpan.FromTicks(long.Parse(value));
+
+            return Convert.ChangeType(value, targetType);
+        }
+
+        // 处理集合类型
+        if (IsCollectionType(targetType))
+        {
+            var itemType = targetType.IsArray
+                ? targetType.GetElementType()
+                : targetType.GetGenericArguments()[0];
+
+            var items = JsonSerializer.Deserialize<List<string>>(value);
+            if (targetType.IsArray)
+            {
+                var array = Array.CreateInstance(itemType, items.Count);
+                for (int i = 0; i < items.Count; i++)
+                {
+                    array.SetValue(DeserializePropertyValue(items[i], itemType), i);
+                }
+                return array;
+            }
+            else if (targetType.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType));
+                foreach (var item in items)
+                {
+                    list.Add(DeserializePropertyValue(item, itemType));
+                }
+                return list;
+            }
+        }
+
+        // 处理复杂对象
+        return JsonSerializer.Deserialize(value, targetType, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+    }
+
+
+
+
+
+    /// <summary>
+    /// 序列化属性值
+    /// </summary>
+    private string SerializePropertyValue(object value)
+    {
+        if (value == null)
+            return "";
+
+        var type = value.GetType();
+
+        // 处理基本类型
+        if (IsSimpleType(type))
+        {
+            // 处理布尔类型
+            if (type == typeof(bool))
+                return ((bool)value) ? "1" : "0";
+
+            return value.ToString();
+        }
+
+        // 处理枚举类型
+        if (type.IsEnum)
+        {
+            return ((int)value).ToString();
+        }
+
+        // 处理日期时间类型
+        if (type == typeof(DateTime))
+        {
+            return ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss.fff");
+        }
+
+        // 处理TimeSpan类型
+        if (type == typeof(TimeSpan))
+        {
+            return ((TimeSpan)value).Ticks.ToString();
+        }
+
+        // 处理集合类型
+        if (IsCollectionType(type))
+        {
+            if (value is IEnumerable enumerable)
+            {
+                var items = new List<string>();
+                foreach (var item in enumerable)
+                {
+                    items.Add(SerializePropertyValue(item));
+                }
+                return JsonSerializer.Serialize(items);
+            }
+        }
+
+        // 处理复杂对象（包括嵌套的实体类）
+        return JsonSerializer.Serialize(value, new JsonSerializerOptions
+        {
+            WriteIndented = false,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+    }
+
+    /// <summary>
+    /// 判断是否为简单类型
+    /// </summary>
+    private bool IsSimpleType(Type type)
+    {
+        return type.IsPrimitive
+            || type == typeof(string)
+            || type == typeof(decimal)
+            || type == typeof(DateTime)
+            || type == typeof(TimeSpan)
+            || type.IsEnum;
+    }
+
+    /// <summary>
+    /// 判断是否为集合类型
+    /// </summary>
+    private bool IsCollectionType(Type type)
+    {
+        return type.IsArray
+            || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(HashSet<>))
+            || typeof(IEnumerable).IsAssignableFrom(type);
+    }
+
+
+
 }

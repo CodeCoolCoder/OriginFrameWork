@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using OriginFrameWork.ConsulModule;
+using OriginFrameWork.JwtBearerModule;
 using OriginFrameWork.Service.OriginApp;
 
 namespace OriginFrameWork.API.Controllers;
@@ -6,7 +8,7 @@ namespace OriginFrameWork.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 //加上特性，所有的请求必须含token，否则无数据
-//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+
 
 //使用步骤
 //1.appsettings.json中修改数据库类型及连接字符串，及是否使用redis等配置,programs中修改使用的库类型，usemysql或者useoracle
@@ -20,18 +22,33 @@ namespace OriginFrameWork.API.Controllers;
 //9.授权过滤器，获取信息在Fileters中的CtmAuthorizationFilterAttribute进行配置，详细使用后续会出文档，可参考在devicesystem中的使用
 public class OriginController : ControllerBase
 {
-    public OriginController(IOriginService originService, IGetDbTest getDbTest)
+    public OriginController(IOriginService originService, IGetDbTest getDbTest, IOriginConsulAnalyse originConsulAnalyse, TokenCreateModel tokenCreateModel)
     {
         OriginService = originService;
         GetDbTest = getDbTest;
+        OriginConsulAnalyse = originConsulAnalyse;
+        TokenCreateModel = tokenCreateModel;
     }
 
     public IOriginService OriginService { get; }
     public IGetDbTest GetDbTest { get; }
+    public IOriginConsulAnalyse OriginConsulAnalyse { get; }
+    public TokenCreateModel TokenCreateModel { get; }
 
+    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("/GETDBSERVICE")]
     public List<string> GETDB()
     {
+
+        //return new List<string>() { "ss", "ff" };
+        //var res = OriginConsulAnalyse.GetUrl("http://UserServiceGroup/WeatherForecast");
         return GetDbTest.GetMainDevices();
+    }
+    [HttpPost("/gettoken")]
+    public string gettoken()
+    {
+        return TokenCreateModel.GetToken("ss");
+
+
     }
 }

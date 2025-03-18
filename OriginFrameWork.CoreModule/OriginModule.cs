@@ -1,4 +1,6 @@
-﻿namespace OriginFrameWork.CoreModule
+﻿using OriginFrameWork.CoreModule.OriginInterface;
+
+namespace OriginFrameWork.CoreModule
 {
     /// <summary>
     /// 所有扩展模块需继承该类

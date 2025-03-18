@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OriginFrameWork.CoreModule.Extensions;
 using OriginFrameWork.CoreModule.OriginServiceRegisterCore;
 
 namespace OriginFrameWork.CoreModule
@@ -11,15 +11,15 @@ namespace OriginFrameWork.CoreModule
         {
             base.ConfigureServices(context);
             var services = context.Services;
-
+            services.AddHttpContextAccessor();
             services.ServiceRegister();
         }
         public override void ApplicationInitialization(OriginApplicationInitializationContext context)
         {
-            //缺少调用的方法
             base.ApplicationInitialization(context);
-            var app = context.GetApplicationBuilder();
-            var env = context.GetEnvironment();
+
+            var app = context.App;
+            var env = context.App.Environment;
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
@@ -28,6 +28,7 @@ namespace OriginFrameWork.CoreModule
             app.UseCors("any");
             app.UseHttpsRedirection();
             app.UseAuthorization();
+
         }
     }
 }

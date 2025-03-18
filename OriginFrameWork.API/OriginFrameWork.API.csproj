@@ -13,9 +13,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OriginFrameWork.Ability\OriginFrameWork.Ability.csproj" />
-    <ProjectReference Include="..\OriginFrameWork.CoreModule\OriginFrameWork.CoreModule.csproj" />
     <ProjectReference Include="..\OriginFrameWork.Service\OriginFrameWork.Service.csproj" />
     <ProjectReference Include="..\OriginFrameWork.Common\OriginFrameWork.Common.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.CoreModule\OriginFrameWork.CoreModule.csproj" />
+    <ProjectReference Include="..\OriginFrameWork.ConsulModule\OriginFrameWork.ConsulModule.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="NLog.config">

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Consul" Version="1.7.14.7" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OriginFrameWork.CoreModule\OriginFrameWork.CoreModule.csproj" />
+  </ItemGroup>
+</Project>

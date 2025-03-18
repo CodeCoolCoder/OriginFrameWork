@@ -1,9 +1,9 @@
-using OriginFrameWork.CoreModule.OriginInterface;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace OriginFrameWork.EntityFrameWorkCoreModule.BaseProvider;
 
-public interface IBaseRepository<TModel> where TModel : BaseModel
+public interface IBaseRepository<TModel, TDbContext> where TDbContext : DbContext
 {
     IQueryable<TModel> FindAsIQueryable();
     int OriginDelete(TModel t);
@@ -15,4 +15,6 @@ public interface IBaseRepository<TModel> where TModel : BaseModel
     int OriginInsertList(List<TModel> t);
     int OriginUpdate(TModel t);
     int OriginUpdateList(List<TModel> t);
+    IQueryable<TModel> OriginGetForSQL(string sql, params object[] parameters);
+    int OriginExcuteSql(string sql, params object[] parameters);
 }

@@ -1,9 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OriginFrameWork.JwtBearerModule
 {
@@ -12,15 +7,15 @@ namespace OriginFrameWork.JwtBearerModule
         public TokenCreateModel(IConfiguration configuration)
         {
             Configuration = configuration;
-          
+
         }
 
         public IConfiguration Configuration { get; }
-    
+
 
         public TokenCreateModel()
         {
-            
+
         }
         public string userId { get; set; }
         public string securityKey { get; set; }
@@ -39,10 +34,10 @@ namespace OriginFrameWork.JwtBearerModule
                 audience = Configuration.GetValue<string>("JwtAuth:Audience"),
                 issuer = Configuration.GetValue<string>("JwtAuth:Issuer"),
                 securityKey = Configuration.GetValue<string>("JwtAuth:SecurityKey"),
-                expiresTime = TimeSpan.FromHours(2),
+                expiresTime = TimeSpan.FromHours(int.Parse(Configuration.GetValue<string>("JwtAuth:Expires"))),
                 userId = id
-            };           
-            return JwtCreatService.CreateToken( tokenCreateModel);
+            };
+            return JwtCreat.CreateToken(tokenCreateModel);
         }
 
     }

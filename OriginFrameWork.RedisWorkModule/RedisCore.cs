@@ -19,7 +19,7 @@ public class RedisCore
         var redisConnStr = Configuration.GetSection("Connection").Get<RedisConnection>().RedisConnectionString;
         //将redis连接字符串转换为ConfigurationOptions对象，该对象包含了redis连接相关的各种配置选项
         ConfigurationOptions configurationOptions = ConfigurationOptions.Parse(redisConnStr);
-        configurationOptions.DefaultDatabase = Configuration.GetSection("Connection").Get<RedisConnection>().RedisDb; ;
+        configurationOptions.DefaultDatabase = Configuration.GetSection("Connection").Get<RedisConnection>().RedisDb;
         //创建redis连接对象
         Conn = ConnectionMultiplexer.Connect(configurationOptions);
         //开启管理员权限

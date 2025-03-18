@@ -26,7 +26,7 @@ public class OriginFrameWorkJwtBearerModule : OriginModule
         {
             opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(opt =>
+        }).AddJwtBearer("OriginScheme", opt =>
         {
             opt.RequireHttpsMetadata = false;
             opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters

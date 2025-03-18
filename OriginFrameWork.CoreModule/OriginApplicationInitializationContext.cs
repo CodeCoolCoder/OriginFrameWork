@@ -1,15 +1,15 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Microsoft.AspNetCore.Builder;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OriginFrameWork.CoreModule
 {
     public class OriginApplicationInitializationContext
     {
-        public IServiceProvider ServiceProvider { get; set; }
+        public WebApplication App { get; set; }
 
-        public OriginApplicationInitializationContext([NotNull] IServiceProvider serviceProvider)
+        public OriginApplicationInitializationContext([NotNull] WebApplication app)
         {
-
-            ServiceProvider = serviceProvider;
+            App = app;
         }
     }
 }

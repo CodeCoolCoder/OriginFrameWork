@@ -5,12 +5,12 @@ namespace OriginFrameWork.Service.OriginApp
 {
     public class GetDbTest : IGetDbTest
     {
-        public GetDbTest(IBaseRepository<MainDevice> baseRepository)
+        public GetDbTest(IBaseRepository<MainDevice, OriginDbContext> baseRepository)
         {
             BaseRepository = baseRepository;
         }
 
-        public IBaseRepository<MainDevice> BaseRepository { get; }
+        public IBaseRepository<MainDevice, OriginDbContext> BaseRepository { get; }
 
         public List<string> GetMainDevices()
         {

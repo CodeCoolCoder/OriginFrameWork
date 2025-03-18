@@ -1,5 +1,5 @@
 
-using OriginFrameWork.Common.JWTTokenHelper;
+using OriginFrameWork.API;
 
 using OriginFrameWork.CoreModule.OriginServiceRegisterCore;
 
@@ -17,27 +17,39 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 // Add services to the container.
 //鉴权配置注册
-builder.Services.AuthenticationRegister();
-builder.Services.OriginModuleRegister();
+//builder.Services.AuthenticationRegister();
+
+builder.Services.OriginModuleConfigRegister();
+//builder.Services.ServiceRegister();
 //授权配置注册
-builder.Services.AuthorizationRegister();
+//builder.Services.AuthorizationRegister();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+//更改配置及相关操作
+builder.Services.useoption1(opt =>
+{
+    opt.name = "123";
+});
+builder.Services.tconfigure<testoption>(opt =>
+{
+    opt.name = "456";
+});
 // builder.Services.AddSwaggerGen();
 //配置跨域
 builder.Services.AddCors(c => c.AddPolicy("any", p => p.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin()));
-var app = builder.Build();
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-app.UseCors("any");
-app.UseHttpsRedirection();
 
-app.UseAuthorization();
+var app = builder.Build();
+app.OriginModuleApplicationRegister();
+// Configure the HTTP request pipeline.
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+//app.UseCors("any");
+//app.UseHttpsRedirection();
+
+//app.UseAuthorization();
 
 app.MapControllers();
 

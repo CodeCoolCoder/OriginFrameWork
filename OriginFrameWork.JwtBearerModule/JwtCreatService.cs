@@ -1,15 +1,11 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace OriginFrameWork.JwtBearerModule
 {
-    public class JwtCreatService: IJwtCreatService        
+    public class JwtCreat
     {
         public static string CreateToken(TokenCreateModel tokenCreateModel)
         {
@@ -30,7 +26,7 @@ namespace OriginFrameWork.JwtBearerModule
             var token = new JwtSecurityToken(
                 issuer: tokenCreateModel.issuer,
                 audience: tokenCreateModel.audience,
-                expires:DateTime.Now.Add(tokenCreateModel.expiresTime),
+                expires: DateTime.Now.Add(tokenCreateModel.expiresTime),
                 signingCredentials: creds,
                 claims: claims);
             //将此实例处理的类型标记序列化为 XML。

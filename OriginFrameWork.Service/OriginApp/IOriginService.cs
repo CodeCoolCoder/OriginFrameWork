@@ -6,7 +6,7 @@ namespace OriginFrameWork.Service.OriginApp;
 [RemoteServiceAttribute("OriginService")]
 public interface IOriginService : IRemoteServiceTag
 {
-    [RemoteServiceIndividualAttribute("GET")]
+    [RemoteServiceIndividualAttribute("POST")]
     Task<string> GetString(string get);
 
 }

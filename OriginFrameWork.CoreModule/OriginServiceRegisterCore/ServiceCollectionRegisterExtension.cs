@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OriginFrameWork.CoreModule.OriginInterface;
@@ -9,30 +10,9 @@ namespace OriginFrameWork.CoreModule.OriginServiceRegisterCore;
 
 public static class ServiceCollectionRegisterExtension
 {
-    public static HashSet<Type> processedModules = new();
-    /// <summary>
-    /// 仓储注册
-    /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
-    public static IServiceCollection RepositoryRegister(this IServiceCollection services)
-    {
-        //反射获取core中的仓储服务,load-->已知程序集的文件名或路径，加载程序集。
-        // var asmCore = Assembly.Load("OriginFrameWork.Core");
-        var asmCore = Assembly.Load(" OriginFrameWork.EntityFrameWorkCoreModule");
-        var assemblys = AppDomain.CurrentDomain.GetAssemblies();
-        //GetTypes，获取所有类型，在DealerPlatForm.Core程序集中获取泛型类型为Repository，泛型参数只有一个的泛型，`1表示只有一个泛型参数，我们的Repository只有一个泛型参数entity
-        var implementtationtype = asmCore.GetTypes().FirstOrDefault(m => m.Name == "BaseRepository`1");
-        //获取接口类型,GetGenericTypeDefinition返回一个表示可用于构造当前泛型类型的泛型类型定义的 Type 对象。 GetInterface返回的是一个对象，GetGenericTypeDefinition返回的是type对象
-        var interfacetype = implementtationtype?.GetInterface("IBaseRepository`1").GetGenericTypeDefinition();
-
-        //开始注册服务,因为implementtationtype和interfacetype都是type类型，所以同builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
-        if (interfacetype != null && implementtationtype != null)
-        {
-            services.AddTransient(interfacetype, implementtationtype);
-        }
-        return services;
-    }
+    public static HashSet<Type> processedConfigModules = new();
+    public static HashSet<Type> processedApplicationModules = new();
+    public static IEnumerable<Type> Types = new List<Type>();
     /// <summary>
     /// 注册涉及到业务的一些服务
     /// </summary>
@@ -66,6 +46,17 @@ public static class ServiceCollectionRegisterExtension
                 && !m.IsAbstract
                 && !m.IsInterface
             );
+            var managertypes = asmService.GetTypes().Where(
+                m => m.IsAssignableTo(typeof(IocManager))
+                && !m.IsAbstract
+                && !m.IsInterface
+            );
+            var managertypesForGeneric = asmService.GetTypes().Where(
+              m => m.IsAssignableTo(typeof(IocManagerForGenerics))
+              && !m.IsAbstract
+              && !m.IsInterface
+          );
+
             //     var cscs = asmService.GetTypes().Where(
             //        m => m.IsAssignableTo(typeof(IRemoteServiceTag))
             //        && !m.IsAbstract
@@ -84,48 +75,83 @@ public static class ServiceCollectionRegisterExtension
                 var interfacetype = implementtationtypeForGeneric.GetGenericTypeDefinition();
                 services.AddTransient(interfacetype, implementtationtypeForGeneric);
             }
+            foreach (var manager in managertypes)
+            {
+                //var interfacetype = implementtationtypeForGeneric.GetGenericTypeDefinition();
+                services.AddTransient(manager);
+            }
+            foreach (var managerForGeneric in managertypesForGeneric)
+            {
+                //var interfacetype = implementtationtypeForGeneric.GetGenericTypeDefinition();
+                services.AddTransient(managerForGeneric);
+            }
+
+
         }
         return services;
+    }
+    private static List<Type> GetTypes()
+    {
+        List<Type> types = new();
+        var assemblys = AppDomain.CurrentDomain.GetAssemblies();
+        foreach (var assembly in assemblys)
+        {
+            types.AddRange(assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IOriginModule)) && !t.IsInterface && !t.IsAbstract));
+
+        }
+        Types = types;
+        return types;
     }
     /// <summary>
     ///扩展模块注册
     /// </summary>
     /// <param name="services"></param>
-    public static void OriginModuleRegister(this IServiceCollection services)
+    public static void OriginModuleConfigRegister(this IServiceCollection services)
     {
         var context = new OriginServiceConfigurationContext(services);
-        // .GetAssemblies().GetReferanceAssemblies()
-        var assemblys = AppDomain.CurrentDomain.GetAssemblies();
-        foreach (var assembly in assemblys)
+        var types = GetTypes();
+        foreach (var type in types)
         {
-
-            var types = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IOriginModule)) && !t.IsInterface && !t.IsAbstract);
-            foreach (var type in types)
-            {
-
-                //递归获取所有的模块
-                ProcessModule(type, context);
-                //var nowModule = Activator.CreateInstance(type) as IOriginModule;
-                //nowModule.ConfigureServices(context);
-                //var attribute = type.GetCustomAttributes<OriginInject>(true).ToList();
-                //foreach (var attr in attribute)
-                //{
-                //    var origintypes = attr.ModuleType;
-                //    foreach (var item in origintypes)
-                //    {
-                //        var moduleRes = Activator.CreateInstance(item) as IOriginModule;
-                //        moduleRes.ConfigureServices(context);
-                //    }
-                //}
-            }
-
+            //递归获取所有的模块
+            ProcessConfigModule(type, context);
         }
+        //var applicationContext = new OriginApplicationInitializationContext(application);
+        // .GetAssemblies().GetReferanceAssemblies()
+        //var assemblys = AppDomain.CurrentDomain.GetAssemblies();
+        //foreach (var assembly in assemblys)
+        //{
+        //    var types = assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(IOriginModule)) && !t.IsInterface && !t.IsAbstract);
+        //    foreach (var type in types)
+        //    {
+        //        //递归获取所有的模块
+        //        ProcessModule(type, context);
+        //    }
+        //}
     }
+    public static void OriginModuleApplicationRegister(this WebApplication webApplication)
+    {
+        var context = new OriginApplicationInitializationContext(webApplication);
 
-    private static void ProcessModule(Type moduleType, OriginServiceConfigurationContext context)
+        foreach (var type in Types)
+        {
+            //递归获取所有的模块
+            ProcessApplicationModule(type, context);
+        }
+
+    }
+    /// <summary>
+    /// 配置config模块
+    /// </summary>
+    /// <param name="moduleType"></param>
+    /// <param name="context"></param> <summary>
+    /// 
+    /// </summary>
+    /// <param name="moduleType"></param>
+    /// <param name="context"></param>
+    private static void ProcessConfigModule(Type moduleType, OriginServiceConfigurationContext? context)
     {
         // 如果已经处理过这个模块，直接返回
-        if (!processedModules.Add(moduleType))
+        if (!processedConfigModules.Add(moduleType))
         {
             return;
         }
@@ -137,7 +163,8 @@ public static class ServiceCollectionRegisterExtension
             foreach (var dependencyType in attr.ModuleType)
             {
                 // 递归处理依赖模块
-                ProcessModule(dependencyType, context);
+                ProcessConfigModule(dependencyType, context);
+
             }
         }
 
@@ -147,18 +174,58 @@ public static class ServiceCollectionRegisterExtension
             var moduleInstance = Activator.CreateInstance(moduleType) as IOriginModule;
             if (moduleInstance != null)
             {
+
                 moduleInstance.ConfigureServices(context);
-                Console.WriteLine($"已配置模块: {moduleType.Name}");
+
+                Console.WriteLine($"Config已配置模块: {moduleType.Name}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"创建模块 {moduleType.Name} 失败: {ex.Message}");
+            Console.WriteLine($"Config创建模块 {moduleType.Name} 失败: {ex.Message}");
         }
     }
+    /// <summary>
+    /// 配置application模块
+    /// </summary>
+    /// <param name="moduleType"></param>
+    /// <param name="applicationInitializationContext"></param> <summary>
+    private static void ProcessApplicationModule(Type moduleType, OriginApplicationInitializationContext? applicationInitializationContext)
+    {
+        // 如果已经处理过这个模块，直接返回
+        if (!processedApplicationModules.Add(moduleType))
+        {
+            return;
+        }
 
+        // 先处理依赖模块
+        var attributes = moduleType.GetCustomAttributes<OriginInject>(true);
+        foreach (var attr in attributes)
+        {
+            foreach (var dependencyType in attr.ModuleType)
+            {
+                // 递归处理依赖模块
+                ProcessApplicationModule(dependencyType, applicationInitializationContext);
 
+            }
+        }
 
+        // 创建并配置当前模块
+        try
+        {
+            var moduleInstance = Activator.CreateInstance(moduleType) as IOriginModule;
+            if (moduleInstance != null)
+            {
+
+                moduleInstance.ApplicationInitialization(applicationInitializationContext);
+                Console.WriteLine($"Application已配置模块: {moduleType.Name}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Application创建模块 {moduleType.Name} 失败: {ex.Message}");
+        }
+    }
 
 }
 

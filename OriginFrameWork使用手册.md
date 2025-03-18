@@ -1,3 +1,4 @@
+
 集成automapper，jwttoken，authorizationfilter过滤器，redis操作类，仓储服务层（基于EFC），业务服务层
 一、配置文件
 在API层的appsetting.json中，配置数据库连接、redis连接、jwt配置、需注册的服务程序集名称IocList等，在代码中详细说明各配置作用
